@@ -39,8 +39,24 @@ document.querySelector('.save-btn button').addEventListener('click', () => {
     return alert('현재 위치를 확인 중입니다. 잠시만 기다려주세요');
   }
 
-  const lat = currentLatLng.lat;
-  const lng = currentLatLng.lng;
+  // const lat = currentLatLng.lat;
+  // const lng = currentLatLng.lng;
+  const { lat, lng } = currentLatLng;
+
+  // 리버스 지오코딩
+  fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
+    .then(res => res.json())
+    .then(data => {
+      const address = data.display_name || '주소 정보 없음';
+
+      const googleMapUrl = `https://www.google.com/maps/search/?api=1query=${lat},${lng}`;
+
+      //주소와 링크 알림
+      alert(
+        `주차 위치 저장됨\n\n주소:\n${address}`
+      );
+
+    });
 
   // 구글 맵 주소 형식 생성
   const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}`;
