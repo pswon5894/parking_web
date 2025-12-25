@@ -39,8 +39,6 @@ document.querySelector('.save-btn button').addEventListener('click', () => {
     return alert('현재 위치를 확인 중입니다. 잠시만 기다려주세요');
   }
 
-  // const lat = currentLatLng.lat;
-  // const lng = currentLatLng.lng;
   const { lat, lng } = currentLatLng;
 
   // 리버스 지오코딩
@@ -91,3 +89,14 @@ fetch('https://your-server.com/locations')
 
 
 // 반드시 “© OpenStreetMap contributors”를 표시해야 한다, 라이센스
+if(money > 5000) {
+  rideTaxi
+} else if(money >2000) {
+  rideBus
+} else {
+  walk();
+}
+
+for(let i =0; i<10; i++){
+  console.log("반복문 실행" + i)
+}
