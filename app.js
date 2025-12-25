@@ -89,14 +89,3 @@ fetch('https://your-server.com/locations')
 
 
 // 반드시 “© OpenStreetMap contributors”를 표시해야 한다, 라이센스
-if(money > 5000) {
-  rideTaxi
-} else if(money >2000) {
-  rideBus
-} else {
-  walk();
-}
-
-for(let i =0; i<10; i++){
-  console.log("반복문 실행" + i)
-}
