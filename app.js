@@ -29,19 +29,81 @@ map.on('locationerror', function () {
 const saveBtn = L.control({position: 'topright'});
 saveBtn.onAdd = function() {
   const div = L.DomUtil.create('div', 'save-btn');
-  div.innerHTML = '<button style="padding: 10px; cursor: pointer;">주차 위치 복사</button>';
+  div.innerHTML = `<button style="padding: 10px; cursor: pointer;">주차 위치 복사</button><br/>
+    <input type="file" id="photoInput"
+      accept="image/*"
+      capture="environment"
+      style="margin-top:5px;" />
+  `;
   return div;
 };
 saveBtn.addTo(map);
 
-document.querySelector('.save-btn button').addEventListener('click', () => {
+// 이미지 모달 HTML 추가
+const modalHTML = `
+  <div id="imageModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center; cursor:pointer;">
+    <img id="modalImage" style="max-width:90%; max-height:90%; object-fit:contain;" />
+  </div>
+`;
+document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+// 모달 닫기 이벤트
+document.getElementById('imageModal').addEventListener('click', () => {
+  document.getElementById('imageModal').style.display = 'none';
+});
+
+// 이미지 확대 함수 (전역)
+window.openImage = function(src) {
+  const modal = document.getElementById('imageModal');
+  const img = document.getElementById('modalImage');
+  img.src = src;
+  modal.style.display = 'flex';
+};
+
+
+function readImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+
+document.querySelector('.save-btn button').addEventListener('click', async () => {
   if (!currentLatLng) {
     return alert('현재 위치를 확인 중입니다. 잠시만 기다려주세요');
   }
 
+
+  const fileInput = document.getElementById('photoInput');
+  if (!fileInput.files.length) {
+    return alert('주차 사진을 찍거나 선택해주세요.');
+  }
+
+  const imageBase64 = await readImage(fileInput.files[0]);
+
+
   const { lat, lng } = currentLatLng;
 
-  // 리버스 지오코딩
+
+  // 마커 생성
+  const marker = L.marker([lat, lng]).addTo(map);
+
+  marker.bindPopup(
+    `<b> 주차 위치</b><br/>
+    <img src="${imageBase64}"
+    style="width:200px; margin-top:5px; border-radius:8px; cursor:pointer;"
+    onclick="openImage('${imageBase64}')"
+    /><br/>
+    <a href="https://www.google.com/maps?q=${lat},${lng}"
+       target="_blank">구글맵으로 열기</a>`
+  );
+
+  marker.openPopup();
+
+  // 리버스 지오코딩, 좌표를 주소로 안내
   fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`)
     .then(res => res.json())
     .then(data => {
@@ -68,24 +130,3 @@ document.querySelector('.save-btn button').addEventListener('click', () => {
     alert('클립보드 복사에 실패했습니다.');
   });
 });
-
-// 예시 마커 (주차 위치)
-// const parkingMarker = L.marker([37.5665, 126.9780])
-//     .addTo(map)
-//     .bindPopup('현재 주차 위치');
-
-// 서버에서 위치 받아오는 예시
-/*
-fetch('https://your-server.com/locations')
-  .then(res => res.json())
-  .then(data => {
-    data.forEach(car => {
-      L.marker([car.lat, car.lng])
-        .addTo(map)
-        .bindPopup(`차량 ID: ${car.carId}`);
-    });
-  });
-*/
-
-
-// 반드시 “© OpenStreetMap contributors”를 표시해야 한다, 라이센스
